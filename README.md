@@ -1,94 +1,34 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import requests
-import time
+# 🚀 2026 全球科技投資戰鬥定位圖 
+### 基於 Nvidia 座標圖邏輯與 Finnhub 即時估值分析
 
-# 1. 基礎設定與 API 配置
-st.set_page_config(page_title="2026 投資戰略座標", layout="wide")
-FINNHUB_API_KEY = "d1f12n9r01qsg7d9nf50d1f12n9r01qsg7d9nf5g" # ⬅️ 填入你的 KEY
+這是一個互動式的 Web 數據視覺化工具，旨在追蹤 2026 年核心科技股在「營收成長率」與「預估本益比」座標軸上的動態位置。透過串接 **Finnhub API**，系統能即時計算 Forward P/E 與 PEG，並結合 2026 年關鍵政府政策進行深度評估。
 
-st.title("🚀 Nvidia 座標圖邏輯：2026 動態估值分析")
-st.caption(f"數據更新時間: {time.strftime('%Y-%m-%d %H:%M:%S')} (Finnhub Real-time)")
 
-# 2. 定義個股清單與 2026 預期營收成長率 (根據研究報告設定)
-# 這裡的 Growth 是我們對 2026 年的預測值，P/E 則由 API 股價動態計算
-stocks_config = {
-    'NVDA': {'name': 'NVIDIA', 'growth': 75.0, 'sector': '半導體/AI', 'color': '#76b900'},
-    'VST': {'name': 'Vistra', 'growth': 45.0, 'sector': '核能/電力', 'color': '#ff4b4b'},
-    'AMD': {'name': 'AMD', 'growth': 52.0, 'sector': '半導體/AI', 'color': '#fe2850'},
-    'RKLB': {'name': 'Rocket Lab', 'growth': 92.0, 'sector': '商業太空', 'color': '#00a3e0'},
-    'MSFT': {'name': 'Microsoft', 'growth': 18.5, 'sector': '科技巨頭', 'color': '#f25022'},
-    'TSLA': {'name': 'Tesla', 'growth': 15.0, 'sector': '自動駕駛', 'color': '#cc0000'},
-    'SMR': {'name': 'NuScale', 'growth': 115.0, 'sector': '小型核能', 'color': '#ff9900'}
-}
 
-# 3. 定義獲取 Finnhub 數據的函式
-def get_finnhub_data(symbol):
-    # 獲取即時股價 (Quote)
-    quote_url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
-    # 獲取預估盈餘 (Earnings Estimates) 用於計算 Forward P/E
-    est_url = f"https://finnhub.io/api/v1/stock/earnings-estimate?symbol={symbol}&token={FINNHUB_API_KEY}"
-    
-    try:
-        q_res = requests.get(quote_url).json()
-        e_res = requests.get(est_url).json()
-        
-        current_price = q_res.get('c', 0)
-        # 取未來一年的平均 EPS 預估值
-        fwd_eps = e_res[0].get('epsAvg', 1.0) if e_res else 1.0 
-        fwd_pe = current_price / fwd_eps if fwd_eps > 0 else 0
-        
-        return current_price, round(fwd_pe, 2)
-    except:
-        return 0, 0
+## 🛠️ 核心功能
+* **動態座標定位**：即時抓取最新股價，動態計算 Y 軸（Forward P/E）。
+* **性價比篩選**：利用 X 軸（2026 預期營收成長）尋找「右下角」黃金性價比標的。
+* **政策深度評估**：整合 2026 年《AI 電力保障法案》、《先進封裝補貼》與《商業太空採購》之影響分析。
+* **手機端優化**：支援兩指縮放、橫向全螢幕與手勢操作，適合行動裝置隨時查看。
 
-# 4. 建立數據集
-data_list = []
-with st.spinner('正在同步 Finnhub 最新市場數據...'):
-    for ticker, info in stocks_config.items():
-        price, pe = get_finnhub_data(ticker)
-        data_list.append({
-            'Ticker': ticker,
-            'Name': info['name'],
-            'Sales Growth (%)': info['growth'],
-            'Forward P/E': pe,
-            'Price': price,
-            'Sector': info['sector'],
-            'Color': info['color']
-        })
+## 📊 座標軸邏輯 (Bloomberg Style)
+| 象限 | 特徵 | 2026 策略代表個股 |
+| :--- | :--- | :--- |
+| **右下 (黃金區)** | 高成長、合理估值 | **NVDA, VST, AMD** |
+| **右上 (爆發區)** | 極高成長、高溢價 | **RKLB, SMR, CRWD** |
+| **中心 (基石區)** | 穩健成長、貼近大盤 | **MSFT, META, GOOGL** |
+| **左上 (挑戰區)** | 成長趨緩、估值過高 | **TSLA, SOFI** |
 
-df = pd.DataFrame(data_list)
+## 🌐 2026 關鍵政策動態
+本系統特別針對以下政策對座標軸的「位移影響」進行了建模：
+1.  **電力優先分配權**：推動 VST、SMR 等電力基建股向右移動。
+2.  **主權 AI 與封裝補貼**：確保 NVDA、MU 在高毛利下維持低本益比位階。
+3.  **太空軍商業撥款**：推動 RKLB、RDW 營收規模（氣泡大小）快速擴張。
 
-# 5. 繪製互動式座標圖
-fig = px.scatter(
-    df, x='Sales Growth (%)', y='Forward P/E',
-    text='Ticker', size='Price', color='Sector',
-    hover_name='Name',
-    hover_data={'Ticker':True, 'Price':':$.2f', 'Sales Growth (%)':':.1f%', 'Forward P/E':':.2f'},
-    template='plotly_dark',
-    height=600
-)
+## 🚀 快速開始
+1.  點擊網址：[你的 Streamlit Cloud 網址]
+2.  使用手機瀏覽時，建議開啟「橫向模式」以獲得最佳視覺體驗。
+3.  **數據更新**：每次重新整理網頁，系統將自動從 Finnhub 抓取最新成交價與分析師預估值。
 
-# 優化圖表外觀與縮放
-fig.update_traces(textposition='top center', marker=dict(line=dict(width=1, color='white')))
-fig.update_layout(
-    xaxis=dict(title="2026 預期營收成長率 (%)", gridcolor='#333'),
-    yaxis=dict(title="動態預估本益比 (Forward P/E)", gridcolor='#333'),
-    dragmode='pan' # 預設為平移，方便手機操作
-)
-
-st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': True})
-
-# 6. 詳細政策評估表 (自動化與表格化)
-st.divider()
-st.subheader("📋 2026 關鍵政策與個股估值評估")
-
-policy_df = pd.DataFrame([
-    ["核能/電力 (VST, SMR)", "2026 電力優先分配法案", "顯著右移 (成長加速)", "強烈看好"],
-    ["半導體 (NVDA, AMD)", "先進封裝補貼實施", "下移 (估值修復)", "價值區"],
-    ["商業太空 (RKLB)", "太空軍商業採購撥款", "氣泡變大 (營收噴發)", "高風險高回報"],
-    ["自動駕駛 (TSLA)", "Robotaxi 監管拉鋸", "停留在左上方", "觀望"],
-], columns=["板塊", "進行中政策", "座標位移方向", "詳細評估"])
-
-st.table(policy_df)
+---
+*免責聲明：本工具僅供學術研究與投資討論參考，不構成任何投資建議。投資人應獨立評估 2026 年市場風險。*

@@ -26,7 +26,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # API 金鑰與配置 (⬅️ 填入您的 Key)
-FINNHUB_API_KEY = "在此輸入你的_FINNHUB_API_KEY"
+FINNHUB_API_KEY = "d1f12n9r01qsg7d9nf50d1f12n9r01qsg7d9nf5g"
 
 st.markdown("# 2026 投資座標定位")
 st.caption(f"數據最後更新: {time.strftime('%Y-%m-%d %H:%M:%S')} (Finnhub Real-time)")

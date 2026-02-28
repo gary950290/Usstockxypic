@@ -8,7 +8,7 @@ import time
 st.set_page_config(page_title="2026 投資座標定位", layout="wide")
 
 # 請確保在此填入正確的 API Key
-FINNHUB_API_KEY = "d1f12n9r01qsg7d9nf50d1f12n9r01qsg7d9nf5g"
+FINNHUB_API_KEY = "d6h6jc9r01qnjncnhra0d6h6jc9r01qnjncnhrag"
 
 st.title("🚀 Nvidia 座標圖邏輯：2026 動態估值")
 
